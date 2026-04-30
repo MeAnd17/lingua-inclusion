@@ -16,6 +16,8 @@ export class TecladoNavService {
   private readonly vozService  = inject(VozService);
 
   readonly modoTeclado = signal(false);
+  /** Cuando hay un modal abierto, las flechas no navegan el fondo */
+  readonly modalAbierto = signal(false);
 
   private synth: SpeechSynthesis | null = null;
   private utterance: SpeechSynthesisUtterance | null = null;
@@ -40,8 +42,9 @@ export class TecladoNavService {
         return;
       }
 
-      // Navegación con flechas solo en modo teclado
+      // Navegación con flechas solo en modo teclado y sin modal abierto
       if (!this.modoTeclado()) return;
+      if (this.modalAbierto()) return; // el modal maneja sus propias flechas
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();

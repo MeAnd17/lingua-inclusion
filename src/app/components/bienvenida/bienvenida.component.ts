@@ -229,11 +229,16 @@ export class BienvenidaComponent implements AfterViewInit {
     // Cuando el selector aparece: poner foco en el primer botón y anunciar las opciones
     effect(() => {
       if (this.bienvenida.mostrandoSelector()) {
+        this.tecladoNav.modalAbierto.set(true);
         this.selectorFoco = 0;
         setTimeout(() => {
           this.enfocarBotonSelector(0);
           this.anunciarSelector();
         }, 150);
+      } else if (this.bienvenida.mostrandoEscrito()) {
+        this.tecladoNav.modalAbierto.set(true);
+      } else {
+        this.tecladoNav.modalAbierto.set(false);
       }
     });
   }
@@ -267,6 +272,7 @@ export class BienvenidaComponent implements AfterViewInit {
   onSelectorKeydown(e: KeyboardEvent): void {
     if (e.key === 'Escape') {
       this.bienvenida.cerrarSelector();
+      this.devolverFocoAlCuerpo();
       return;
     }
 
@@ -280,6 +286,16 @@ export class BienvenidaComponent implements AfterViewInit {
       this.selectorFoco = (this.selectorFoco + 2) % 3;
       this.enfocarBotonSelector(this.selectorFoco);
     }
+  }
+
+  private devolverFocoAlCuerpo(): void {
+    // Devuelve el foco al primer elemento enfocable de la página
+    setTimeout(() => {
+      const primero = document.querySelector<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      primero?.focus();
+    }, 100);
   }
 
   // ── Tutorial escrito ───────────────────────────────────────────────────────
