@@ -1,7 +1,8 @@
-import { Component, inject, computed, signal, OnInit, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, inject, computed, signal, ElementRef, AfterViewInit, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BienvenidaService } from '../../services/bienvenida.service';
 import { LanguageService } from '../../services/language.service';
+import { TecladoNavService } from '../../services/teclado-nav.service';
 import { TouchTargetDirective } from '../../directives/touch-target.directive';
 
 @Component({
@@ -30,9 +31,9 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
           <button
             #btnVoz
             class="bv-selector__btn bv-selector__btn--voz"
-            (click)="bienvenida.elegirVoz()"
+            (click)="elegirVoz()"
             liTouchTarget
-            [attr.aria-label]="textos().btnVoz"
+            [attr.aria-label]="textos().btnVoz + '. ' + textos().hintVoz"
           >
             <span class="bv-selector__btn-icono" aria-hidden="true">🔊</span>
             <span class="bv-selector__btn-label">{{ textos().btnVoz }}</span>
@@ -41,10 +42,11 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
 
           <!-- Botón ESCRITO -->
           <button
+            #btnEscrito
             class="bv-selector__btn bv-selector__btn--escrito"
             (click)="bienvenida.elegirEscrito()"
             liTouchTarget
-            [attr.aria-label]="textos().btnEscrito"
+            [attr.aria-label]="textos().btnEscrito + '. ' + textos().hintEscrito"
           >
             <span class="bv-selector__btn-icono" aria-hidden="true">📖</span>
             <span class="bv-selector__btn-label">{{ textos().btnEscrito }}</span>
@@ -53,6 +55,7 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
         </div>
 
         <button
+          #btnSaltar
           class="bv-selector__saltar"
           (click)="bienvenida.cerrarSelector()"
           liTouchTarget
@@ -203,10 +206,16 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
   styleUrls: ['./bienvenida.component.scss'],
 })
 export class BienvenidaComponent implements AfterViewInit {
-  @ViewChild('btnVoz') btnVozRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('btnVoz')     btnVozRef?:     ElementRef<HTMLButtonElement>;
+  @ViewChild('btnEscrito') btnEscritoRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('btnSaltar')  btnSaltarRef?:  ElementRef<HTMLButtonElement>;
 
-  readonly bienvenida = inject(BienvenidaService);
+  readonly bienvenida  = inject(BienvenidaService);
   readonly langService = inject(LanguageService);
+  private readonly tecladoNav = inject(TecladoNavService);
+
+  // Índice del botón enfocado en el selector: 0=Voz, 1=Escrito, 2=Saltar
+  private selectorFoco = 0;
 
   readonly pasosBanner = [
     { codigo: 'es' as const, flag: '🇵🇪', label: 'Español' },
@@ -216,20 +225,65 @@ export class BienvenidaComponent implements AfterViewInit {
 
   private readonly orden = ['es', 'qu', 'ay'];
 
-  ngAfterViewInit(): void {
-    // Cuando se abre el selector, poner foco en el primer botón automáticamente
-    // para que personas ciegas lo encuentren de inmediato
-    if (this.bienvenida.mostrandoSelector()) {
-      setTimeout(() => this.btnVozRef?.nativeElement.focus(), 100);
+  constructor() {
+    // Cuando el selector aparece: poner foco en el primer botón y anunciar las opciones
+    effect(() => {
+      if (this.bienvenida.mostrandoSelector()) {
+        this.selectorFoco = 0;
+        setTimeout(() => {
+          this.enfocarBotonSelector(0);
+          this.anunciarSelector();
+        }, 150);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {}
+
+  // ── Selector ───────────────────────────────────────────────────────────────
+
+  /** Anuncia en voz el título y las opciones del selector */
+  private anunciarSelector(): void {
+    const t = this.textos();
+    const texto = `${t.tituloSelector}. ${t.btnVoz}: ${t.hintVoz}. ${t.btnEscrito}: ${t.hintEscrito}. ${t.saltar}.`;
+    this.tecladoNav.anunciar(texto);
+  }
+
+  /** Mueve el foco entre los 3 botones del selector */
+  private enfocarBotonSelector(idx: number): void {
+    const botones = [
+      this.btnVozRef?.nativeElement,
+      this.btnEscritoRef?.nativeElement,
+      this.btnSaltarRef?.nativeElement,
+    ];
+    botones[idx]?.focus();
+  }
+
+  elegirVoz(): void {
+    this.tecladoNav.cancelar();
+    this.bienvenida.elegirVoz();
+  }
+
+  onSelectorKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape') {
+      this.bienvenida.cerrarSelector();
+      return;
+    }
+
+    // Flechas navegan entre los 3 botones del selector
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.selectorFoco = (this.selectorFoco + 1) % 3;
+      this.enfocarBotonSelector(this.selectorFoco);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.selectorFoco = (this.selectorFoco + 2) % 3;
+      this.enfocarBotonSelector(this.selectorFoco);
     }
   }
 
-  /** Foco automático al botón Voz cuando el selector aparece */
-  onSelectorKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape') this.bienvenida.cerrarSelector();
-  }
+  // ── Tutorial escrito ───────────────────────────────────────────────────────
 
-  /** Navegación con flechas en el tutorial escrito */
   onEscritoKeydown(e: KeyboardEvent): void {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
@@ -280,7 +334,7 @@ export class BienvenidaComponent implements AfterViewInit {
     return {
       es: {
         tituloSelector:  '¿Cómo quieres el tutorial?',
-        descSelector:    'Elige cómo quieres conocer la aplicación.',
+        descSelector:    'Usa las flechas para moverte entre opciones y Enter para elegir.',
         btnVoz:          'Tutorial en voz',
         hintVoz:         'Para personas con baja visión',
         btnEscrito:      'Tutorial escrito',
@@ -299,7 +353,7 @@ export class BienvenidaComponent implements AfterViewInit {
       },
       qu: {
         tituloSelector:  '¿Imaynatan tutorialita munankichu?',
-        descSelector:    'Imaynatan appita riqsiyta munankichu akllakuy.',
+        descSelector:    'Flecha teclakunawan puriykuy, Enterwan akllakuy.',
         btnVoz:          'Uyariy tutorial',
         hintVoz:         'Mana allin rikuqpaq',
         btnEscrito:      'Qillqasqa tutorial',
@@ -318,7 +372,7 @@ export class BienvenidaComponent implements AfterViewInit {
       },
       ay: {
         tituloSelector:  '¿Kunjamatisa tutorial munañataki?',
-        descSelector:    'Kunjamatisa app uñt\'añataki akllaña.',
+        descSelector:    'Flecha teclanakampi puriña, Entermpi akllaña.',
         btnVoz:          'Uyaña tutorial',
         hintVoz:         'Janiwa alwa uñt\'iri jaqitaki',
         btnEscrito:      'Qillqata tutorial',
