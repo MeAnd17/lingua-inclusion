@@ -1,0 +1,265 @@
+@use '../../styles/variables' as v;
+@use '../../styles/mixins' as m;
+
+// ── Skip link (primer Tab) ─────────────────────────────────────────────────────
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 12px;
+  background: white;
+  color: var(--color-primario);
+  padding: 10px 20px;
+  border-radius: var(--radio-md);
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
+  z-index: 9999;
+  transition: top 0.2s;
+  box-shadow: var(--sombra-lg);
+  border: 2px solid var(--color-primario);
+
+  &:focus {
+    top: 12px;
+    outline: 3px solid var(--color-primario);
+    outline-offset: 2px;
+  }
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: linear-gradient(135deg, #2D46D6 0%, #4F6EF7 60%, #6B87F9 100%);
+  box-shadow: 0 4px 24px rgba(79,110,247,0.35);
+
+  &__container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 64px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  // Logo
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: white;
+    flex-shrink: 0;
+    border-radius: var(--radio-sm);
+    padding: 4px 6px;
+
+    &:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+    &:focus-visible { @include m.focus-ring(white); }
+  }
+
+  &__logo {
+    font-size: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  &__titulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: white;
+    @include m.mobile-only { display: none; }
+  }
+
+  // Nav — flex en desktop, dropdown en móvil
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    justify-content: center;
+
+    // En móvil: oculto por defecto, se muestra al abrir
+    @include m.mobile-only {
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: #2D46D6;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 8px 12px 16px;
+      gap: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 199;
+
+      &--abierto {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+  }
+
+  // Controles derecha
+  &__controles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  &__idiomas {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--radio-full);
+    padding: 3px;
+  }
+
+  &__perfiles {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--radio-full);
+    padding: 3px;
+
+    // Ocultar en móvil (están en el menú)
+    @include m.mobile-only { display: none; }
+  }
+}
+
+// ── Enlace de nav ──────────────────────────────────────────────────────────────
+.nav__enlace {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  font-size: 0.87rem;
+  font-weight: 600;
+  border-radius: var(--radio-md);
+  transition: all var(--transicion);
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255,255,255,0.14);
+    color: white;
+    text-decoration: none;
+  }
+
+  &:focus-visible { @include m.focus-ring(white); }
+
+  &--activo {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-weight: 700;
+  }
+
+  // En móvil: más grande y con separador
+  @include m.mobile-only {
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-radius: var(--radio-md);
+  }
+}
+
+.nav__icono { font-size: 1rem; }
+
+// ── Botones de idioma ──────────────────────────────────────────────────────────
+.btn-idioma {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.72);
+  border-radius: var(--radio-full);
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transicion);
+
+  &:hover { background: rgba(255,255,255,0.15); color: white; }
+  &:focus-visible { @include m.focus-ring(white); }
+
+  &--activo {
+    background: white;
+    color: var(--color-primario);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+}
+
+// ── Botones de perfil ──────────────────────────────────────────────────────────
+.btn-perfil {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.72);
+  border-radius: var(--radio-full);
+  width: 32px;
+  height: 32px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transicion);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover { background: rgba(255,255,255,0.15); color: white; }
+  &:focus-visible { @include m.focus-ring(white); }
+
+  &--activo {
+    background: white;
+    color: var(--color-primario);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+}
+
+// ── Hamburguesa — solo móvil ───────────────────────────────────────────────────
+.btn-hamburguesa {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+  padding: 8px;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  transition: background var(--transicion);
+
+  @include m.mobile-only { display: flex; }
+
+  &:hover { background: rgba(255,255,255,0.22); }
+  &:focus-visible { @include m.focus-ring(white); }
+
+  &--abierto {
+    background: rgba(255,255,255,0.2);
+    .hamburguesa-linea:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburguesa-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburguesa-linea:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  }
+}
+
+.hamburguesa-linea {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+
+// ── Animación logo ─────────────────────────────────────────────────────────────
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}

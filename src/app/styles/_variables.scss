@@ -1,0 +1,123 @@
+:root {
+  // Paleta principal — azul índigo vibrante
+  --color-primario:        #4F6EF7;
+  --color-primario-rgb:    79, 110, 247;
+  --color-primario-oscuro: #3A57E8;
+  --color-primario-claro:  #6B87F9;
+  --color-acento:          #FF6B35;
+  --color-acento-rgb:      255, 107, 53;
+
+  // Superficies
+  --color-fondo:            #F4F6FD;
+  --color-fondo-secundario: #EBEEf8;
+  --color-superficie:       #FFFFFF;
+  --color-borde:            #E2E6F3;
+
+  // Texto
+  --color-texto:            #1A1D2E;
+  --color-texto-secundario: #6B7280;
+  --color-texto-inverso:    #FFFFFF;
+
+  // Espaciado
+  --espacio-xs:  4px;
+  --espacio-sm:  8px;
+  --espacio-md:  16px;
+  --espacio-lg:  24px;
+  --espacio-xl:  48px;
+  --espacio-2xl: 80px;
+
+  // Bordes
+  --radio-sm:   8px;
+  --radio-md:   14px;
+  --radio-lg:   20px;
+  --radio-xl:   28px;
+  --radio-full: 9999px;
+
+  // Sombras
+  --sombra-xs:  0 1px 3px rgba(79,110,247,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --sombra-sm:  0 4px 12px rgba(79,110,247,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --sombra-md:  0 8px 24px rgba(79,110,247,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  --sombra-lg:  0 16px 40px rgba(79,110,247,0.16), 0 8px 16px rgba(0,0,0,0.08);
+  --sombra-xl:  0 24px 60px rgba(79,110,247,0.20), 0 12px 24px rgba(0,0,0,0.10);
+
+  // Focus
+  --color-focus: #4F6EF7;
+  --ancho-focus: 3px;
+
+  // Transiciones
+  --transicion: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transicion-lenta: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ── Alto contraste ─────────────────────────────────────────────────────────────
+.perfil-alto-contraste {
+  --color-primario:         #0000CC;
+  --color-primario-rgb:     0, 0, 204;
+  --color-primario-oscuro:  #000099;
+  --color-fondo:            #FFFFFF;
+  --color-fondo-secundario: #EEEEEE;
+  --color-superficie:       #FFFFFF;
+  --color-borde:            #000000;
+  --color-texto:            #000000;
+  --color-texto-secundario: #111111;
+  --color-texto-inverso:    #FFFFFF;
+  --color-focus:            #CC0000;
+  --sombra-xs: 0 0 0 2px #000;
+  --sombra-sm: 0 0 0 2px #000;
+  --sombra-md: 0 0 0 3px #000;
+  --sombra-lg: 0 0 0 3px #000;
+
+  * { border-color: #000000 !important; text-shadow: none !important; }
+  a { color: #0000CC !important; text-decoration: underline !important; }
+
+  // Header negro
+  .header { background: #000000 !important; box-shadow: 0 2px 0 #FFFFFF !important; }
+  .nav-desktop__enlace, .nav__enlace {
+    color: #FFFFFF !important;
+    &--activo, &:hover { background: #FFFFFF !important; color: #000000 !important; }
+  }
+  .btn-idioma { color: #FFFFFF !important; border: 2px solid #FFFFFF !important;
+    &--activo { background: #FFFFFF !important; color: #000000 !important; } }
+  .btn-perfil { color: #FFFFFF !important; border: 2px solid #FFFFFF !important;
+    &--activo { background: #FFFF00 !important; color: #000000 !important; border-color: #FFFF00 !important; } }
+
+  // Tarjetas
+  .tarjeta { border: 3px solid #000 !important; box-shadow: none !important; background: #FFF !important;
+    &__cabecera { background: #000 !important; color: #FFF !important; }
+    &__termino { color: #000 !important; font-size: 1.6rem !important; }
+    &__definicion { color: #111 !important; }
+  }
+  .btn-accion { border: 2px solid #000 !important; color: #000 !important; background: #FFF !important;
+    &--activo, &:hover { background: #000 !important; color: #FFF !important; } }
+
+  // Buscador / filtros
+  .filtro-chip { border: 2px solid #000 !important; color: #000 !important; background: #FFF !important;
+    &--activo { background: #000 !important; color: #FFF !important; } }
+  .buscar-input { border: 3px solid #000 !important; background: #FFF !important; color: #000 !important; }
+
+  // Hero
+  .hero, .diccionario-hero { background: #000 !important;
+    * { color: #FFF !important; }
+    .btn-primario { background: #FFFF00 !important; color: #000 !important; border: 2px solid #000 !important; }
+    .btn-secundario { background: #FFF !important; color: #000 !important; border: 2px solid #FFF !important; }
+  }
+
+  // Categorías
+  .categoria-card { border: 3px solid #000 !important; background: #FFF !important;
+    &__label { color: #000 !important; }
+    &__count { background: #000 !important; color: #FFF !important; }
+  }
+
+  // Tutorial
+  .tutorial-btn { background: #000 !important; color: #FFF !important; border: 2px solid #FFF !important; }
+
+  // Focus rojo para máxima visibilidad
+  *:focus, *:focus-visible {
+    outline: 4px solid #CC0000 !important;
+    outline-offset: 3px !important;
+  }
+}
+
+// ── Tamaños de fuente ──────────────────────────────────────────────────────────
+.fuente-grande      { font-size: 18px; }
+.fuente-extra-grande { font-size: 22px; }

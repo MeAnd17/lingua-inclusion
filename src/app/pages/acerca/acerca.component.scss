@@ -1,0 +1,58 @@
+@use '../../styles/variables' as v;
+@use '../../styles/mixins' as m;
+
+.pagina-acerca {
+  padding: var(--espacio-xl) var(--espacio-md);
+}
+
+.acerca-contenido {
+  max-width: 720px;
+  margin: 0 auto;
+
+  .acerca-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: var(--espacio-xl);
+    flex-wrap: wrap;
+  }
+
+  h1 { color: var(--color-primario); margin-bottom: 0; }
+
+  section {
+    margin-bottom: var(--espacio-xl);
+    padding-bottom: var(--espacio-lg);
+    border-bottom: 1px solid var(--color-borde);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  h2 {
+    margin-bottom: var(--espacio-md);
+    color: var(--color-texto);
+  }
+
+  p {
+    color: var(--color-texto-secundario);
+    line-height: 1.7;
+    margin-bottom: var(--espacio-sm);
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-sm);
+
+    li {
+      color: var(--color-texto-secundario);
+      padding: var(--espacio-sm);
+      background: var(--color-fondo-secundario);
+      border-radius: var(--radio-sm);
+      font-size: 0.95rem;
+    }
+  }
+}

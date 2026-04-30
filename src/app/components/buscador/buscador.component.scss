@@ -1,0 +1,174 @@
+@use '../../styles/variables' as v;
+@use '../../styles/mixins' as m;
+
+.buscador {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px;
+
+  // ── Campo de búsqueda ────────────────────────────────────────────────────────
+  &__campo-wrapper {
+    margin-bottom: 24px;
+  }
+
+  &__label {
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-texto);
+    margin-bottom: 10px;
+  }
+
+  &__input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__icono-busqueda {
+    position: absolute;
+    left: 18px;
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 16px 50px 16px 50px;
+    font-size: 1.05rem;
+    border: 2px solid var(--color-borde);
+    border-radius: var(--radio-xl);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    transition: border-color var(--transicion), box-shadow var(--transicion);
+    box-shadow: var(--sombra-xs);
+    font-family: 'Inter', sans-serif;
+
+    &::placeholder { color: var(--color-texto-secundario); opacity: 0.7; }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primario);
+      box-shadow: 0 0 0 4px rgba(var(--color-primario-rgb), 0.12), var(--sombra-sm);
+    }
+
+    &::-webkit-search-cancel-button { display: none; }
+  }
+
+  &__btn-limpiar {
+    position: absolute;
+    right: 14px;
+    background: var(--color-texto-secundario);
+    border: none;
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transicion), transform var(--transicion);
+
+    &:hover { background: var(--color-texto); transform: scale(1.1); }
+    &:focus-visible { @include m.focus-ring; }
+  }
+
+  // ── Filtros ──────────────────────────────────────────────────────────────────
+  &__filtros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  // ── Grid de resultados ───────────────────────────────────────────────────────
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
+    animation: fadeInUp 0.3s ease forwards;
+
+    @include m.mobile-only { grid-template-columns: 1fr; }
+  }
+
+  &__sin-resultados {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-texto-secundario);
+
+    span { font-size: 3.5rem; display: block; margin-bottom: 16px; }
+    p { font-size: 1.05rem; margin-bottom: 20px; }
+  }
+}
+
+// ── Botones de filtro ──────────────────────────────────────────────────────────
+.filtro-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: var(--radio-full);
+  background: var(--color-superficie);
+  color: var(--color-texto-secundario);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transicion);
+  white-space: nowrap;
+  box-shadow: var(--sombra-xs);
+
+  &:hover {
+    border-color: var(--color-cat, var(--color-primario));
+    color: var(--color-cat, var(--color-primario));
+    transform: translateY(-1px);
+    box-shadow: var(--sombra-sm);
+  }
+
+  &:focus-visible { @include m.focus-ring; }
+
+  &--activo {
+    background: var(--color-cat, var(--color-primario));
+    border-color: var(--color-cat, var(--color-primario));
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(var(--color-primario-rgb), 0.3);
+  }
+}
+
+.btn-limpiar-filtros {
+  padding: 12px 28px;
+  background: var(--color-primario);
+  color: white;
+  border: none;
+  border-radius: var(--radio-full);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transicion);
+  box-shadow: var(--sombra-sm);
+
+  &:hover {
+    background: var(--color-primario-oscuro);
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-md);
+  }
+  &:focus-visible { @include m.focus-ring; }
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
