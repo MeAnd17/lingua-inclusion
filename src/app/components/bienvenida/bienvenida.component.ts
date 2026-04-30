@@ -26,6 +26,34 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
         </h2>
         <p class="bv-selector__desc">{{ textos().descSelector }}</p>
 
+        <!-- Selector de idioma -->
+        <div class="bv-selector__idiomas" role="group" [attr.aria-label]="textos().elegirIdioma">
+          <p class="bv-selector__idiomas-label">{{ textos().elegirIdioma }}</p>
+          <div class="bv-selector__idiomas-botones">
+            <button
+              class="bv-idioma-btn"
+              [class.bv-idioma-btn--activo]="langService.idioma() === 'es'"
+              (click)="cambiarIdioma('es')"
+              liTouchTarget
+              aria-label="Español"
+            >🇵🇪 ES</button>
+            <button
+              class="bv-idioma-btn"
+              [class.bv-idioma-btn--activo]="langService.idioma() === 'qu'"
+              (click)="cambiarIdioma('qu')"
+              liTouchTarget
+              aria-label="Quechua"
+            >🏔️ QU</button>
+            <button
+              class="bv-idioma-btn"
+              [class.bv-idioma-btn--activo]="langService.idioma() === 'ay'"
+              (click)="cambiarIdioma('ay')"
+              liTouchTarget
+              aria-label="Aymara"
+            >🌄 AY</button>
+          </div>
+        </div>
+
         <div class="bv-selector__botones">
           <!-- Botón VOZ — primer foco al abrir -->
           <button
@@ -226,19 +254,22 @@ export class BienvenidaComponent implements AfterViewInit {
   private readonly orden = ['es', 'qu', 'ay'];
 
   constructor() {
-    // Cuando el selector aparece: poner foco en el primer botón y anunciar las opciones
+    // Cuando el selector aparece: bloquear fondo, poner foco y anunciar en 3 idiomas
     effect(() => {
       if (this.bienvenida.mostrandoSelector()) {
         this.tecladoNav.modalAbierto.set(true);
+        document.body.style.overflow = 'hidden'; // bloquear scroll del fondo
         this.selectorFoco = 0;
         setTimeout(() => {
           this.enfocarBotonSelector(0);
-          this.anunciarSelector();
+          this.anunciarSelectorTresIdiomas();
         }, 150);
       } else if (this.bienvenida.mostrandoEscrito()) {
         this.tecladoNav.modalAbierto.set(true);
+        document.body.style.overflow = 'hidden';
       } else {
         this.tecladoNav.modalAbierto.set(false);
+        document.body.style.overflow = ''; // restaurar scroll
       }
     });
   }
@@ -247,11 +278,31 @@ export class BienvenidaComponent implements AfterViewInit {
 
   // ── Selector ───────────────────────────────────────────────────────────────
 
-  /** Anuncia en voz el título y las opciones del selector */
-  private anunciarSelector(): void {
-    const t = this.textos();
-    const texto = `${t.tituloSelector}. ${t.btnVoz}: ${t.hintVoz}. ${t.btnEscrito}: ${t.hintEscrito}. ${t.saltar}.`;
-    this.tecladoNav.anunciar(texto);
+  /** Anuncia el selector en los 3 idiomas: ES → QU → AY */
+  private anunciarSelectorTresIdiomas(): void {
+    if (!window.speechSynthesis) return;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    const frases = [
+      { texto: '¿Cómo quieres el tutorial? Tutorial en voz, para personas con baja visión. Tutorial escrito, para personas sordas.', lang: 'es-PE' },
+      { texto: '¿Imaynatan tutorialita munankichu? Uyariy tutorial, mana allin rikuqpaq. Qillqasqa tutorial, mana uyariqpaq.', lang: 'es-PE' },
+      { texto: '¿Kunjamatisa tutorial munañataki? Uyaña tutorial, janiwa alwa uñt\'iri jaqitaki. Qillqata tutorial, janiwa uyiri jaqitaki.', lang: 'es-PE' },
+    ];
+
+    let idx = 0;
+    const siguiente = () => {
+      if (idx >= frases.length) return;
+      const f = frases[idx];
+      const u = new SpeechSynthesisUtterance(f.texto);
+      u.lang   = f.lang;
+      u.rate   = 0.9;
+      u.volume = 1;
+      u.onend  = () => { idx++; setTimeout(siguiente, 400); };
+      u.onerror = () => { idx++; setTimeout(siguiente, 200); };
+      synth.speak(u);
+    };
+    setTimeout(siguiente, 200);
   }
 
   /** Mueve el foco entre los 3 botones del selector */
@@ -267,6 +318,10 @@ export class BienvenidaComponent implements AfterViewInit {
   elegirVoz(): void {
     this.tecladoNav.cancelar();
     this.bienvenida.elegirVoz();
+  }
+
+  cambiarIdioma(idioma: 'es' | 'qu' | 'ay'): void {
+    this.langService.setIdioma(idioma);
   }
 
   onSelectorKeydown(e: KeyboardEvent): void {
@@ -351,6 +406,7 @@ export class BienvenidaComponent implements AfterViewInit {
       es: {
         tituloSelector:  '¿Cómo quieres el tutorial?',
         descSelector:    'Usa las flechas para moverte entre opciones y Enter para elegir.',
+        elegirIdioma:    'Primero elige tu idioma:',
         btnVoz:          'Tutorial en voz',
         hintVoz:         'Para personas con baja visión',
         btnEscrito:      'Tutorial escrito',
@@ -370,6 +426,7 @@ export class BienvenidaComponent implements AfterViewInit {
       qu: {
         tituloSelector:  '¿Imaynatan tutorialita munankichu?',
         descSelector:    'Flecha teclakunawan puriykuy, Enterwan akllakuy.',
+        elegirIdioma:    'Ñawpaq simita akllay:',
         btnVoz:          'Uyariy tutorial',
         hintVoz:         'Mana allin rikuqpaq',
         btnEscrito:      'Qillqasqa tutorial',
@@ -389,6 +446,7 @@ export class BienvenidaComponent implements AfterViewInit {
       ay: {
         tituloSelector:  '¿Kunjamatisa tutorial munañataki?',
         descSelector:    'Flecha teclanakampi puriña, Entermpi akllaña.',
+        elegirIdioma:    'Nayraru simiña akllaña:',
         btnVoz:          'Uyaña tutorial',
         hintVoz:         'Janiwa alwa uñt\'iri jaqitaki',
         btnEscrito:      'Qillqata tutorial',
