@@ -254,27 +254,50 @@ export class BienvenidaComponent implements AfterViewInit {
   private readonly orden = ['es', 'qu', 'ay'];
 
   constructor() {
-    // Cuando el selector aparece: bloquear fondo, poner foco y anunciar en 3 idiomas
+    // Cuando el selector aparece: bloquear fondo y foco
     effect(() => {
       if (this.bienvenida.mostrandoSelector()) {
         this.tecladoNav.modalAbierto.set(true);
-        document.body.style.overflow = 'hidden'; // bloquear scroll del fondo
+        document.body.style.overflow = 'hidden';
         this.selectorFoco = 0;
-        setTimeout(() => {
-          this.enfocarBotonSelector(0);
-          this.anunciarSelectorTresIdiomas();
-        }, 150);
+        // Escuchar el primer gesto para disparar la voz
+        this.registrarGestoParaVoz();
+        setTimeout(() => this.enfocarBotonSelector(0), 150);
       } else if (this.bienvenida.mostrandoEscrito()) {
         this.tecladoNav.modalAbierto.set(true);
         document.body.style.overflow = 'hidden';
       } else {
         this.tecladoNav.modalAbierto.set(false);
-        document.body.style.overflow = ''; // restaurar scroll
+        document.body.style.overflow = '';
       }
     });
   }
 
   ngAfterViewInit(): void {}
+
+  // ── Voz al primer gesto ────────────────────────────────────────────────────
+
+  private vozYaAnunciada = false;
+
+  /**
+   * Los navegadores bloquean speechSynthesis sin gesto previo del usuario.
+   * Escuchamos el primer keydown o click para disparar la voz.
+   */
+  private registrarGestoParaVoz(): void {
+    if (this.vozYaAnunciada) return;
+
+    const disparar = () => {
+      if (this.vozYaAnunciada) return;
+      this.vozYaAnunciada = true;
+      document.removeEventListener('keydown', disparar);
+      document.removeEventListener('click', disparar);
+      // Activar modo teclado si fue una tecla
+      this.anunciarSelectorTresIdiomas();
+    };
+
+    document.addEventListener('keydown', disparar, { once: true });
+    document.addEventListener('click',   disparar, { once: true });
+  }
 
   // ── Selector ───────────────────────────────────────────────────────────────
 
@@ -325,13 +348,28 @@ export class BienvenidaComponent implements AfterViewInit {
   }
 
   onSelectorKeydown(e: KeyboardEvent): void {
+    // Tab activa modo teclado y queda atrapado dentro del modal
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      this.tecladoNav.modoTeclado.set(true);
+      document.body.classList.add('modo-teclado');
+      // Tab avanza, Shift+Tab retrocede entre los 3 botones
+      if (e.shiftKey) {
+        this.selectorFoco = (this.selectorFoco + 2) % 3;
+      } else {
+        this.selectorFoco = (this.selectorFoco + 1) % 3;
+      }
+      this.enfocarBotonSelector(this.selectorFoco);
+      return;
+    }
+
     if (e.key === 'Escape') {
       this.bienvenida.cerrarSelector();
       this.devolverFocoAlCuerpo();
       return;
     }
 
-    // Flechas navegan entre los 3 botones del selector
+    // Flechas también navegan entre los 3 botones
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
       this.selectorFoco = (this.selectorFoco + 1) % 3;
