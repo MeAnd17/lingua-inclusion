@@ -34,7 +34,8 @@ export class BienvenidaService {
   private cancelado = false;
 
   // ── Guiones de voz ─────────────────────────────────────────────────────────
-  private readonly guiones = {
+  // Versión escritorio (con instrucciones de teclado)
+  private readonly guionesDesktop = {
     es: [
       'Bienvenido a Lingua-Inclusion.',
       'Esta aplicación te ayuda a aprender palabras en español, quechua y aymara.',
@@ -42,7 +43,7 @@ export class BienvenidaService {
       'También puedes cambiar el modo visual: estándar, alto contraste, solo audio, o pictogramas.',
       'Usa la sección Diccionario para buscar palabras y escuchar su pronunciación.',
       'En la sección Práctica encontrarás un juego para poner a prueba tu vocabulario.',
-      'Puedes navegar toda la aplicación con la tecla Tab de tu teclado.',
+      'Puedes navegar toda la aplicación con las teclas de flecha de tu teclado.',
       'Cada elemento que enfoques será anunciado en voz alta.',
     ],
     qu: [
@@ -52,7 +53,7 @@ export class BienvenidaService {
       'Rikuyta tikrayta atinki: lliw rikuy, hatun contraste, uyariy kama, o rikuchiy rikuy.',
       'Simikunap Qillqanpi simikunata maskayta uyariyta atinki.',
       'Yachay Pukllaypi simikunata yachakunapaq pukllaykunata tariyta atinki.',
-      'Tab teclakunawan llapan appita puriykuy atinki.',
+      'Flecha teclakunawan llapan appita puriykuy atinki.',
     ],
     ay: [
       'Lingua-Inclusion appiru jutañataki.',
@@ -61,12 +62,52 @@ export class BienvenidaService {
       'Uñt\'aña tikrañataki: lliw uñt\'aña, jach\'a contraste, uyañataki kama, uñt\'ayiri uñaña.',
       'Siminakana Qillqaru siminaka maskañataki uyañataki atañataki.',
       'Yatiqaña Pukaraña sectionaru siminaka yatiqañataki pukaraña tarañataki.',
-      'Tab teclanakampi taqini appita puriña atañataki.',
+      'Flecha teclanakampi taqini appita puriña atañataki.',
     ],
   };
 
+  // Versión móvil (sin instrucciones de teclado, con instrucciones táctiles)
+  private readonly guionesMovil = {
+    es: [
+      'Bienvenido a Lingua-Inclusion.',
+      'Esta aplicación te ayuda a aprender palabras en español, quechua y aymara.',
+      'En la parte superior puedes cambiar el idioma tocando los botones ES, QU y AY.',
+      'También puedes cambiar el modo visual: estándar, alto contraste, solo audio, o pictogramas.',
+      'Toca la sección Diccionario para buscar palabras y escuchar su pronunciación.',
+      'En la sección Práctica encontrarás un juego para poner a prueba tu vocabulario.',
+      'Toca cualquier botón de audio para escuchar cómo se pronuncia cada palabra.',
+    ],
+    qu: [
+      'Lingua-Inclusion appiman hamuqtiyki.',
+      'Kay appim español, quechua, aymarapiwan simikunata yachakuyta yanapasunki.',
+      'Hawkay partim ES, QU, AY botonkunata tiyay simita tikranapaq.',
+      'Rikuyta tikrayta atinki: lliw rikuy, hatun contraste, uyariy kama, o rikuchiy rikuy.',
+      'Simikunap Qillqanta tiyay simikunata maskanapaq.',
+      'Yachay Pukllaypi simikunata yachakunapaq pukllaykunata tariyta atinki.',
+      'Audio botonkunata tiyay simita imaynatan niyta uyarinapaq.',
+    ],
+    ay: [
+      'Lingua-Inclusion appiru jutañataki.',
+      'Kay appiru español, quechua, aymararu siminaka yatiqañataki yanapt\'añataki.',
+      'Patxaru ES, QU, AY botonnaka tiyaña simiña tikrañataki.',
+      'Uñt\'aña tikrañataki: lliw uñt\'aña, jach\'a contraste, uyañataki kama, uñt\'ayiri uñaña.',
+      'Siminakana Qillqa tiyaña siminaka maskañataki.',
+      'Yatiqaña Pukaraña sectionaru siminaka yatiqañataki pukaraña tarañataki.',
+      'Audio botonnaka tiyaña simiña kunjamatisa siñañataki uyañataki.',
+    ],
+  };
+
+  private get guiones() {
+    return this.esMovil() ? this.guionesMovil : this.guionesDesktop;
+  }
+
+  private esMovil(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  }
+
   // ── Tutorial escrito (pasos visuales) ──────────────────────────────────────
-  readonly pasosTutorial: Record<'es' | 'qu' | 'ay', PasoTutorial[]> = {
+  private readonly pasosTutorialDesktop: Record<'es' | 'qu' | 'ay', PasoTutorial[]> = {
     es: [
       { icono: '🌐', titulo: 'Cambia el idioma',
         texto: 'Usa los botones ES, QU o AY en la barra superior para cambiar entre Español, Quechua y Aymara. Todo el contenido cambia al instante.' },
@@ -110,6 +151,55 @@ export class BienvenidaService {
         texto: 'Sapa tarjetana audio botónmpi uyañataki atañataki. Aswa botónmpi traducciónna yatiyañana uñt\'añataki.' },
     ],
   };
+
+  private readonly pasosTutorialMovil: Record<'es' | 'qu' | 'ay', PasoTutorial[]> = {
+    es: [
+      { icono: '🌐', titulo: 'Cambia el idioma',
+        texto: 'Toca los botones ES, QU o AY en la barra superior para cambiar entre Español, Quechua y Aymara. Todo cambia al instante.' },
+      { icono: '👁️', titulo: 'Modos de accesibilidad',
+        texto: 'Los íconos junto al idioma cambian el modo visual: estándar, alto contraste, solo audio o pictogramas. Toca el que mejor se adapte a ti.' },
+      { icono: '📖', titulo: 'Diccionario',
+        texto: 'Toca Diccionario para buscar palabras en cualquier idioma. Cada tarjeta tiene audio y traducción en los 3 idiomas.' },
+      { icono: '🎮', titulo: 'Práctica',
+        texto: 'Toca Práctica para jugar un quiz. Elige una categoría y responde 10 preguntas para poner a prueba tu vocabulario.' },
+      { icono: '👆', titulo: 'Navegar la app',
+        texto: 'Desliza hacia arriba y abajo para ver más contenido. Toca cualquier tarjeta para ver su información completa.' },
+      { icono: '🔊', titulo: 'Audio en cada palabra',
+        texto: 'Toca el botón de audio en cada tarjeta para escuchar la pronunciación. Toca "Más" para ver la traducción y el ejemplo de uso.' },
+    ],
+    qu: [
+      { icono: '🌐', titulo: 'Simita tikray',
+        texto: 'ES, QU, AY botonkunata tiyay hawkay partimanta simita tikranapaq. Llapan contenido usqhayta tikran.' },
+      { icono: '👁️', titulo: 'Rikuy tikray',
+        texto: 'Ikonokunam rikuyta tikrachin: normal, hatun contraste, uyariy kama, rikuchiy rikuy. Allinpaq tiyay.' },
+      { icono: '📖', titulo: 'Simikunap Qillqan',
+        texto: 'Simikunap Qillqanta tiyay simikunata maskanapaq. Sapa tarjetam audioyuq, kimsa simipi traduccionyuq.' },
+      { icono: '🎮', titulo: 'Yachay Pukllay',
+        texto: 'Yachay Pukllaypi quiz pukllaykunam tiyan. Huk runayta akllay chunka tapuyta kutichiy.' },
+      { icono: '👆', titulo: 'Appita puriykuy',
+        texto: 'Wichariy urariytawan aswan contenidota rikuyta atinki. Sapa tarjetata tiyay aswan willakuykunata rikunapaq.' },
+      { icono: '🔊', titulo: 'Sapa simipi audio',
+        texto: 'Audio botonwan simita uyariy atinki. Aswan botonwan traduccionkunata ejemplokunata rikuyta atinki.' },
+    ],
+    ay: [
+      { icono: '🌐', titulo: 'Simiña tikraña',
+        texto: 'ES, QU, AY botonnaka tiyaña patxaru simiña tikrañataki. Taqini contenido usqharu tikrañataki.' },
+      { icono: '👁️', titulo: 'Uñt\'aña tikraña',
+        texto: 'Ikonunaka uñt\'aña tikrañataki: normal, jach\'a contraste, uyañataki kama, uñt\'ayiri uñaña. Alwaru tiyaña.' },
+      { icono: '📖', titulo: 'Siminakana Qillqa',
+        texto: 'Siminakana Qillqa tiyaña siminaka maskañataki. Sapa tarjetana audio, kimsa simiru traducciónniwa.' },
+      { icono: '🎮', titulo: 'Yatiqaña Pukaraña',
+        texto: 'Yatiqaña Pukaraña tiyaña quiz pukaraña utjañataki. Huk runaña akllaña tunka tapuña kutichaña.' },
+      { icono: '👆', titulo: 'Appita puriña',
+        texto: 'Wicharaña urañampi aswa contenido uñt\'añataki. Sapa tarjeta tiyaña aswa yatiyañana uñt\'añataki.' },
+      { icono: '🔊', titulo: 'Sapa simiña audio',
+        texto: 'Audio botónmpi simiña uyañataki atañataki. Aswa botónmpi traducciónna yatiyañana uñt\'añataki.' },
+    ],
+  };
+
+  get pasosTutorial(): Record<'es' | 'qu' | 'ay', PasoTutorial[]> {
+    return this.esMovil() ? this.pasosTutorialMovil : this.pasosTutorialDesktop;
+  }
 
   constructor() {
     if (typeof window !== 'undefined') {
