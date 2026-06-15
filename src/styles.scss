@@ -11,6 +11,7 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  color-scheme: light;
 }
 
 body {
@@ -123,16 +124,4 @@ button { font-family: inherit; font-size: inherit; }
 
 .fade-in-up { animation: fadeInUp 0.4s ease forwards; }
 
-// ── Modo oscuro ────────────────────────────────────────────────────────────────
-@media (prefers-color-scheme: dark) {
-  :root:not(.perfil-alto-contraste) {
-    --color-fondo: #0F1117;
-    --color-fondo-secundario: #1A1D27;
-    --color-superficie: #1E2130;
-    --color-borde: #2D3148;
-    --color-texto: #E8EAF0;
-    --color-texto-secundario: #8B92A8;
-    --color-primario: #6C8EF5;
-    --color-primario-oscuro: #5A7AE8;
-  }
-}
+// ── Modo oscuro desactivado: la app usa siempre tema claro ────────────────────

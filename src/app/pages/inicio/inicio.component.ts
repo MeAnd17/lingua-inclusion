@@ -28,10 +28,10 @@ import { TutorialComponent } from '../../components/tutorial/tutorial.component'
           <p class="hero__subtitulo">{{ textos().subtitulo }}</p>
 
           <div class="hero__acciones">
-            <a routerLink="/diccionario" class="btn-primario" liTouchTarget>
+            <a routerLink="/diccionario" class="btn btn-light btn-lg" liTouchTarget>
               <span aria-hidden="true">📖</span> {{ textos().btnBuscar }}
             </a>
-            <a routerLink="/practica" class="btn-secundario" liTouchTarget>
+            <a routerLink="/practica" class="btn btn-outline-light btn-lg" liTouchTarget>
               <span aria-hidden="true">🎮</span> {{ textos().btnCategorias }}
             </a>
           </div>
@@ -60,23 +60,24 @@ import { TutorialComponent } from '../../components/tutorial/tutorial.component'
             <h2 id="categorias-titulo" class="seccion-titulo">{{ textos().tituloCategorias }}</h2>
             <p class="seccion-subtitulo">{{ textos().subtituloCategorias }}</p>
           </div>
-          <div class="categorias-grid" role="list">
+          <div class="row g-3" role="list">
             @for (cat of categorias(); track cat.id) {
-              <a
-                [routerLink]="['/diccionario']"
-                [queryParams]="{ categoria: cat.id }"
-                class="categoria-card"
-                [style.--color-cat]="cat.colorActivo"
-                role="listitem"
-                [attr.aria-label]="cat.label + ': explorar palabras'"
-                liTouchTarget
-              >
-                <span class="categoria-card__icono" aria-hidden="true">{{ cat.icono }}</span>
-                <span class="categoria-card__label">{{ cat.label }}</span>
-                <span class="categoria-card__count" [attr.aria-label]="contarPorCategoria(cat.id) + ' palabras'">
-                  {{ contarPorCategoria(cat.id) }}
-                </span>
-              </a>
+              <div class="col-6 col-sm-4 col-md-3" role="listitem">
+                <a
+                  [routerLink]="['/diccionario']"
+                  [queryParams]="{ categoria: cat.id }"
+                  class="categoria-card d-flex flex-column align-items-center"
+                  [style.--color-cat]="cat.colorActivo"
+                  [attr.aria-label]="cat.label + ': explorar palabras'"
+                  liTouchTarget
+                >
+                  <span class="categoria-card__icono" aria-hidden="true">{{ cat.icono }}</span>
+                  <span class="categoria-card__label">{{ cat.label }}</span>
+                  <span class="categoria-card__count" [attr.aria-label]="contarPorCategoria(cat.id) + ' palabras'">
+                    {{ contarPorCategoria(cat.id) }}
+                  </span>
+                </a>
+              </div>
             }
           </div>
         </div>

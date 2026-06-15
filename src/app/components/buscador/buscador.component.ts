@@ -26,12 +26,12 @@ import { Categoria, CATEGORIAS_CONFIG } from '../../models/palabra.model';
         <label for="campo-busqueda" class="buscador__label">
           {{ labelBusqueda() }}
         </label>
-        <div class="buscador__input-wrapper" role="search">
-          <span class="buscador__icono-busqueda" aria-hidden="true">🔍</span>
+        <div class="input-group" role="search">
+          <span class="input-group-text" aria-hidden="true">🔍</span>
           <input
             id="campo-busqueda"
             type="search"
-            class="buscador__input"
+            class="form-control"
             [placeholder]="placeholderBusqueda()"
             [ngModel]="busquedaService.query()"
             (ngModelChange)="onQueryChange($event)"
@@ -45,7 +45,7 @@ import { Categoria, CATEGORIAS_CONFIG } from '../../models/palabra.model';
           />
           @if (busquedaService.hayBusqueda()) {
             <button
-              class="buscador__btn-limpiar"
+              class="btn btn-outline-secondary"
               (click)="limpiar()"
               liTouchTarget
               liAriaLabel="Limpiar búsqueda"
