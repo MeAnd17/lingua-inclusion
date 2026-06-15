@@ -118,10 +118,10 @@ export class HeaderComponent {
   readonly perfiles = computed(() => {
     const i = this.langService.idioma();
     const labels: Record<string, Record<string, string>> = {
-      estandar:        { es: 'Modo estándar',      qu: 'Lliw rikuy',         ay: 'Lliw uñt\'aña'      },
-      'alto-contraste':{ es: 'Alto contraste',      qu: 'Hatun contraste',    ay: 'Jach\'a contraste'  },
-      'solo-audio':    { es: 'Solo audio',           qu: 'Uyariy kama',        ay: 'Uyañataki kama'     },
-      pictogramas:     { es: 'Modo pictogramas',     qu: 'Rikuchiy rikuy',     ay: 'Uñt\'ayiri uñaña'  },
+      estandar:        { es: 'Modo estándar',       qu: 'Lliw rikuy',          ay: 'Lliw uñt\'aña'       },
+      'alto-contraste':{ es: 'Alto contraste',       qu: 'Hatun kanchariy',      ay: 'Jach\'a qhantatawi'  },
+      'solo-audio':    { es: 'Solo audio',            qu: 'Uyariy kama',         ay: 'Uyañataki kama'      },
+      pictogramas:     { es: 'Modo pictogramas',      qu: 'Rikuchiy rikuy',      ay: 'Uñt\'ayiri uñaña'   },
     };
     return [
       { id: 'estandar'        as PerfilAccesibilidad, icono: '👁️', labelActual: () => labels['estandar'][i]         },

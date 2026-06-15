@@ -43,6 +43,18 @@ interface Paso {
         <span aria-hidden="true">🔊</span>
         <span class="tutorial-btn__texto">{{ labelRepetir() }}</span>
       </button>
+
+      <button
+        class="tutorial-btn tutorial-btn--salir"
+        (click)="volverAlSelector()"
+        [liAnunciarFoco]="labelVolver()"
+        liTouchTarget
+        [attr.aria-label]="labelVolver()"
+        [title]="labelVolver()"
+      >
+        <span aria-hidden="true">🔄</span>
+        <span class="tutorial-btn__texto">{{ labelVolver() }}</span>
+      </button>
     </div>
 
     <!-- Modal del tutorial -->
@@ -137,6 +149,15 @@ export class TutorialComponent implements AfterViewInit, OnDestroy {
   readonly labelRepetir = computed(() => {
     const i = this.langService.idioma();
     return { es: 'Repetir tutorial', qu: 'Watiq uyariy', ay: 'Janiw uyañataki' }[i];
+  });
+
+  readonly labelVolver = computed(() => {
+    const i = this.langService.idioma();
+    return {
+      es: 'Cambiar idioma / tutorial',
+      qu: 'Simita o yachachiy tikray',
+      ay: 'Simi o yatichawi tikraña',
+    }[i];
   });
 
   readonly labelCerrar = computed(() => {
@@ -403,7 +424,10 @@ export class TutorialComponent implements AfterViewInit, OnDestroy {
   }
 
   repetirBienvenida(): void {
-    this.bienvenidaService.resetear();
-    this.bienvenidaService.mostrarSelector();
+    this.bienvenidaService.reproducirCompleto();
+  }
+
+  volverAlSelector(): void {
+    this.bienvenidaService.volverAlSelector();
   }
 }

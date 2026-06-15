@@ -24,13 +24,20 @@ export class BienvenidaService {
   private readonly vozService  = inject(VozService);
 
   // ── Signals públicos ───────────────────────────────────────────────────────
-  readonly reproduciendo    = signal(false);
-  readonly idiomaActual     = signal<'es' | 'qu' | 'ay' | null>(null);
-  readonly mostrandoEscrito = signal(false);
+  readonly reproduciendo     = signal(false);
+  readonly idiomaActual      = signal<'es' | 'qu' | 'ay' | null>(null);
+  readonly mostrandoEscrito  = signal(false);
   readonly mostrandoSelector = signal(false);
   readonly pasoEscritoActual = signal(0);
+  /** Signal que AppComponent observa para reabrir el selector inicial */
+  readonly reabrirSelector   = signal(false);
 
-  private synth: SpeechSynthesis | null = null;
+  /** Detiene cualquier reproducción activa y activa el signal para mostrar el selector */
+  volverAlSelector(): void {
+    this.detener();
+    this.cerrarEscrito();
+    this.reabrirSelector.set(true);
+  }  private synth: SpeechSynthesis | null = null;
   private cancelado = false;
 
   // ── Guiones de voz ─────────────────────────────────────────────────────────
@@ -295,13 +302,12 @@ export class BienvenidaService {
 
   private reproducirSecuencia(): void {
     const idiomaActivo = this.langService.idioma() as 'es' | 'qu' | 'ay';
-    const todos: Array<'es' | 'qu' | 'ay'> = ['es', 'qu', 'ay'];
-    const orden = [idiomaActivo, ...todos.filter(i => i !== idiomaActivo)];
 
-    const secuencia = orden.map(idioma => ({ idioma, frases: this.guiones[idioma] }));
+    // Solo reproducir en el idioma activo, sin pasar por los otros
+    const frases = this.guiones[idiomaActivo];
+    let fraseIdx = 0;
 
-    let idiomaIdx = 0;
-    let fraseIdx  = 0;
+    this.idiomaActual.set(idiomaActivo);
 
     const siguiente = () => {
       if (this.cancelado) {
@@ -310,25 +316,16 @@ export class BienvenidaService {
         return;
       }
 
-      const bloque = secuencia[idiomaIdx];
-      if (!bloque) {
+      const frase = frases[fraseIdx];
+      if (!frase) {
+        // Fin del tutorial
         this.reproduciendo.set(false);
         this.idiomaActual.set(null);
         return;
       }
 
-      this.idiomaActual.set(bloque.idioma);
-
-      const frase = bloque.frases[fraseIdx];
-      if (!frase) {
-        idiomaIdx++;
-        fraseIdx = 0;
-        setTimeout(siguiente, 800);
-        return;
-      }
-
       const u = new SpeechSynthesisUtterance(frase);
-      this.vozService.aplicarVoz(u, bloque.idioma);
+      this.vozService.aplicarVoz(u, idiomaActivo);
       u.volume = 1;
       u.rate   = 0.92;
       u.pitch  = 1;

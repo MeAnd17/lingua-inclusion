@@ -225,10 +225,12 @@ export class InicioComponent {
       },
       {
         icono: '◑',
-        titulo: idioma === 'es' ? 'Alto contraste' : idioma === 'qu' ? 'Hatun contraste' : 'Jach\'a contraste',
+        titulo: idioma === 'es' ? 'Alto contraste' : idioma === 'qu' ? 'Hatun kanchariy' : 'Jach\'a qhantatawi',
         descripcion: idioma === 'es'
           ? 'Modo de alto contraste para personas con baja visión (WCAG AA).'
-          : 'Rikuyta yanapaq contraste.',
+          : idioma === 'qu'
+          ? 'Hatun kanchariy rikuyta yanapaq.'
+          : 'Jach\'a qhantatawi uñt\'añataki yanapt\'añataki.',
       },
       {
         icono: '📶',

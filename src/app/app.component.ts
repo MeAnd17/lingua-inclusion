@@ -3,15 +3,18 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { BienvenidaComponent } from './components/bienvenida/bienvenida.component';
+import { SelectorInicialComponent } from './components/selector-inicial/selector-inicial.component';
 import { LanguageService } from './services/language.service';
 import { TecladoNavService } from './services/teclado-nav.service';
-import { BienvenidaService } from './services/bienvenida.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HeaderComponent, BienvenidaComponent],
+  imports: [RouterOutlet, CommonModule, HeaderComponent, BienvenidaComponent, SelectorInicialComponent],
   template: `
+    <!-- Pantalla inicial: elige idioma + tipo de tutorial (primera visita) -->
+    <li-selector-inicial />
+
     <!-- Enlace de salto para accesibilidad -->
     <a href="#contenido-principal" class="skip-link">
       Saltar al contenido principal
@@ -24,7 +27,7 @@ import { BienvenidaService } from './services/bienvenida.service';
         <router-outlet />
       </div>
 
-      <!-- Banner de bienvenida en voz -->
+      <!-- Banner de bienvenida en voz (se activa tras elegir "Tutorial en voz") -->
       <li-bienvenida />
 
       <footer class="app-footer" role="contentinfo">
@@ -91,11 +94,8 @@ import { BienvenidaService } from './services/bienvenida.service';
 export class AppComponent implements OnInit {
   readonly langService = inject(LanguageService);
   private readonly tecladoNav = inject(TecladoNavService);
-  private readonly bienvenida = inject(BienvenidaService);
 
   ngOnInit(): void {
     this.tecladoNav.inicializar();
-    // Reproducir tutorial de bienvenida en voz si es la primera visita
-    this.bienvenida.reproducirSiEsPrimeraVez();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, ElementRef, AfterViewInit, ViewChild, effect } from '@angular/core';
+import { Component, inject, computed, signal, effect, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BienvenidaService } from '../../services/bienvenida.service';
 import { LanguageService } from '../../services/language.service';
@@ -10,90 +10,6 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
   standalone: true,
   imports: [CommonModule, TouchTargetDirective],
   template: `
-    <!-- ══ SELECTOR: ¿Voz o Escrito? ══ -->
-    @if (bienvenida.mostrandoSelector()) {
-      <div class="bv-overlay" aria-hidden="true"></div>
-      <div
-        class="bv-selector"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="bv-selector-titulo"
-        (keydown)="onSelectorKeydown($event)"
-      >
-        <div class="bv-selector__icono" aria-hidden="true">🎓</div>
-        <h2 id="bv-selector-titulo" class="bv-selector__titulo">
-          {{ textos().tituloSelector }}
-        </h2>
-        <p class="bv-selector__desc">{{ textos().descSelector }}</p>
-
-        <!-- Selector de idioma -->
-        <div class="bv-selector__idiomas" role="group" [attr.aria-label]="textos().elegirIdioma">
-          <p class="bv-selector__idiomas-label">{{ textos().elegirIdioma }}</p>
-          <div class="bv-selector__idiomas-botones">
-            <button
-              class="bv-idioma-btn"
-              [class.bv-idioma-btn--activo]="langService.idioma() === 'es'"
-              (click)="cambiarIdioma('es')"
-              liTouchTarget
-              aria-label="Español"
-            >🇵🇪 ES</button>
-            <button
-              class="bv-idioma-btn"
-              [class.bv-idioma-btn--activo]="langService.idioma() === 'qu'"
-              (click)="cambiarIdioma('qu')"
-              liTouchTarget
-              aria-label="Quechua"
-            >🏔️ QU</button>
-            <button
-              class="bv-idioma-btn"
-              [class.bv-idioma-btn--activo]="langService.idioma() === 'ay'"
-              (click)="cambiarIdioma('ay')"
-              liTouchTarget
-              aria-label="Aymara"
-            >🌄 AY</button>
-          </div>
-        </div>
-
-        <div class="bv-selector__botones">
-          <!-- Botón VOZ — primer foco al abrir -->
-          <button
-            #btnVoz
-            class="bv-selector__btn bv-selector__btn--voz"
-            (click)="elegirVoz()"
-            liTouchTarget
-            [attr.aria-label]="textos().btnVoz + '. ' + textos().hintVoz"
-          >
-            <span class="bv-selector__btn-icono" aria-hidden="true">🔊</span>
-            <span class="bv-selector__btn-label">{{ textos().btnVoz }}</span>
-            <span class="bv-selector__btn-hint">{{ textos().hintVoz }}</span>
-          </button>
-
-          <!-- Botón ESCRITO -->
-          <button
-            #btnEscrito
-            class="bv-selector__btn bv-selector__btn--escrito"
-            (click)="bienvenida.elegirEscrito()"
-            liTouchTarget
-            [attr.aria-label]="textos().btnEscrito + '. ' + textos().hintEscrito"
-          >
-            <span class="bv-selector__btn-icono" aria-hidden="true">📖</span>
-            <span class="bv-selector__btn-label">{{ textos().btnEscrito }}</span>
-            <span class="bv-selector__btn-hint">{{ textos().hintEscrito }}</span>
-          </button>
-        </div>
-
-        <button
-          #btnSaltar
-          class="bv-selector__saltar"
-          (click)="bienvenida.cerrarSelector()"
-          liTouchTarget
-          [attr.aria-label]="textos().saltar"
-        >
-          {{ textos().saltar }}
-        </button>
-      </div>
-    }
-
     <!-- ══ TUTORIAL ESCRITO (modal paso a paso) ══ -->
     @if (bienvenida.mostrandoEscrito()) {
       <div class="bv-overlay" aria-hidden="true"></div>
@@ -234,16 +150,9 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
   styleUrls: ['./bienvenida.component.scss'],
 })
 export class BienvenidaComponent implements AfterViewInit {
-  @ViewChild('btnVoz')     btnVozRef?:     ElementRef<HTMLButtonElement>;
-  @ViewChild('btnEscrito') btnEscritoRef?: ElementRef<HTMLButtonElement>;
-  @ViewChild('btnSaltar')  btnSaltarRef?:  ElementRef<HTMLButtonElement>;
-
   readonly bienvenida  = inject(BienvenidaService);
   readonly langService = inject(LanguageService);
   private readonly tecladoNav = inject(TecladoNavService);
-
-  // Índice del botón enfocado en el selector: 0=Voz, 1=Escrito, 2=Saltar
-  private selectorFoco = 0;
 
   readonly pasosBanner = [
     { codigo: 'es' as const, flag: '🇵🇪', label: 'Español' },
@@ -254,19 +163,12 @@ export class BienvenidaComponent implements AfterViewInit {
   private readonly orden = ['es', 'qu', 'ay'];
 
   constructor() {
-    // Cuando el selector aparece: bloquear fondo y foco
+    // Cuando el tutorial escrito aparece: bloquear scroll
     effect(() => {
-      if (this.bienvenida.mostrandoSelector()) {
+      if (this.bienvenida.mostrandoEscrito()) {
         this.tecladoNav.modalAbierto.set(true);
         document.body.style.overflow = 'hidden';
-        this.selectorFoco = 0;
-        // Escuchar el primer gesto para disparar la voz
-        this.registrarGestoParaVoz();
-        setTimeout(() => this.enfocarBotonSelector(0), 150);
-      } else if (this.bienvenida.mostrandoEscrito()) {
-        this.tecladoNav.modalAbierto.set(true);
-        document.body.style.overflow = 'hidden';
-      } else {
+      } else if (!this.bienvenida.reproduciendo()) {
         this.tecladoNav.modalAbierto.set(false);
         document.body.style.overflow = '';
       }
@@ -275,121 +177,8 @@ export class BienvenidaComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {}
 
-  // ── Voz al primer gesto ────────────────────────────────────────────────────
-
-  private vozYaAnunciada = false;
-
-  /**
-   * Los navegadores bloquean speechSynthesis sin gesto previo del usuario.
-   * Escuchamos el primer keydown o click para disparar la voz.
-   */
-  private registrarGestoParaVoz(): void {
-    if (this.vozYaAnunciada) return;
-
-    const disparar = () => {
-      if (this.vozYaAnunciada) return;
-      this.vozYaAnunciada = true;
-      document.removeEventListener('keydown', disparar);
-      document.removeEventListener('click', disparar);
-      // Activar modo teclado si fue una tecla
-      this.anunciarSelectorTresIdiomas();
-    };
-
-    document.addEventListener('keydown', disparar, { once: true });
-    document.addEventListener('click',   disparar, { once: true });
-  }
-
   // ── Selector ───────────────────────────────────────────────────────────────
-
-  /** Anuncia el selector en los 3 idiomas: ES → QU → AY */
-  private anunciarSelectorTresIdiomas(): void {
-    if (!window.speechSynthesis) return;
-    const synth = window.speechSynthesis;
-    synth.cancel();
-
-    const frases = [
-      { texto: '¿Cómo quieres el tutorial? Tutorial en voz, para personas con baja visión. Tutorial escrito, para personas sordas.', lang: 'es-PE' },
-      { texto: '¿Imaynatan tutorialita munankichu? Uyariy tutorial, mana allin rikuqpaq. Qillqasqa tutorial, mana uyariqpaq.', lang: 'es-PE' },
-      { texto: '¿Kunjamatisa tutorial munañataki? Uyaña tutorial, janiwa alwa uñt\'iri jaqitaki. Qillqata tutorial, janiwa uyiri jaqitaki.', lang: 'es-PE' },
-    ];
-
-    let idx = 0;
-    const siguiente = () => {
-      if (idx >= frases.length) return;
-      const f = frases[idx];
-      const u = new SpeechSynthesisUtterance(f.texto);
-      u.lang   = f.lang;
-      u.rate   = 0.9;
-      u.volume = 1;
-      u.onend  = () => { idx++; setTimeout(siguiente, 400); };
-      u.onerror = () => { idx++; setTimeout(siguiente, 200); };
-      synth.speak(u);
-    };
-    setTimeout(siguiente, 200);
-  }
-
-  /** Mueve el foco entre los 3 botones del selector */
-  private enfocarBotonSelector(idx: number): void {
-    const botones = [
-      this.btnVozRef?.nativeElement,
-      this.btnEscritoRef?.nativeElement,
-      this.btnSaltarRef?.nativeElement,
-    ];
-    botones[idx]?.focus();
-  }
-
-  elegirVoz(): void {
-    this.tecladoNav.cancelar();
-    this.bienvenida.elegirVoz();
-  }
-
-  cambiarIdioma(idioma: 'es' | 'qu' | 'ay'): void {
-    this.langService.setIdioma(idioma);
-  }
-
-  onSelectorKeydown(e: KeyboardEvent): void {
-    // Tab activa modo teclado y queda atrapado dentro del modal
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      this.tecladoNav.modoTeclado.set(true);
-      document.body.classList.add('modo-teclado');
-      // Tab avanza, Shift+Tab retrocede entre los 3 botones
-      if (e.shiftKey) {
-        this.selectorFoco = (this.selectorFoco + 2) % 3;
-      } else {
-        this.selectorFoco = (this.selectorFoco + 1) % 3;
-      }
-      this.enfocarBotonSelector(this.selectorFoco);
-      return;
-    }
-
-    if (e.key === 'Escape') {
-      this.bienvenida.cerrarSelector();
-      this.devolverFocoAlCuerpo();
-      return;
-    }
-
-    // Flechas también navegan entre los 3 botones
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      this.selectorFoco = (this.selectorFoco + 1) % 3;
-      this.enfocarBotonSelector(this.selectorFoco);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      this.selectorFoco = (this.selectorFoco + 2) % 3;
-      this.enfocarBotonSelector(this.selectorFoco);
-    }
-  }
-
-  private devolverFocoAlCuerpo(): void {
-    // Devuelve el foco al primer elemento enfocable de la página
-    setTimeout(() => {
-      const primero = document.querySelector<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      primero?.focus();
-    }, 100);
-  }
+  // (Movido a SelectorInicialComponent)
 
   // ── Tutorial escrito ───────────────────────────────────────────────────────
 
