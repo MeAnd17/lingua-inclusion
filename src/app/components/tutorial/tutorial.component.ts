@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, computed } from '@angular/core';
+import { Component, Input, inject, signal, computed, ElementRef, ViewChildren, QueryList, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LanguageService } from '../../services/language.service';
 import { BienvenidaService } from '../../services/bienvenida.service';
@@ -18,7 +18,7 @@ interface Paso {
   standalone: true,
   imports: [CommonModule, AnunciarFocoDirective, TouchTargetDirective],
   template: `
-    <!-- Botón flotante de ayuda -->
+    <!-- Botones flotantes de ayuda (FUERA del modal, no necesitan focus trap) -->
     <div class="tutorial-botones">
       <button
         class="tutorial-btn"
@@ -32,7 +32,6 @@ interface Paso {
         <span class="tutorial-btn__texto">{{ labelAyuda() }}</span>
       </button>
 
-      <!-- Botón para repetir tutorial de voz -->
       <button
         class="tutorial-btn tutorial-btn--voz"
         (click)="repetirBienvenida()"
@@ -68,10 +67,11 @@ interface Paso {
             [liAnunciarFoco]="labelCerrar()"
             liTouchTarget
             [attr.aria-label]="labelCerrar()"
+            #focusableElement
           >✕</button>
         </div>
 
-        <!-- Pasos -->
+        <!-- Pasos (solo lectura, no son interactivos) -->
         <div class="tutorial-modal__pasos">
           @for (paso of pasos().pasos; track paso.titulo; let i = $index) {
             <div class="tutorial-paso" [class.tutorial-paso--activo]="pasoActual() === i">
@@ -87,7 +87,7 @@ interface Paso {
           }
         </div>
 
-        <!-- Sección de teclado -->
+        <!-- Sección de teclado (solo lectura) -->
         <div class="tutorial-teclado">
           <h3 class="tutorial-teclado__titulo">
             <span aria-hidden="true">⌨️</span> {{ labelTeclado() }}
@@ -109,6 +109,7 @@ interface Paso {
             (click)="cerrar()"
             [liAnunciarFoco]="labelEntendido()"
             liTouchTarget
+            #focusableElement
           >
             {{ labelEntendido() }} ✓
           </button>
@@ -118,13 +119,15 @@ interface Paso {
   `,
   styleUrls: ['./tutorial.component.scss'],
 })
-export class TutorialComponent {
+export class TutorialComponent implements AfterViewInit, OnDestroy {
   @Input() seccion: SeccionTutorial = 'general';
+  @ViewChildren('focusableElement') focusableElements!: QueryList<ElementRef<HTMLElement>>;
 
   readonly langService = inject(LanguageService);
   private readonly bienvenidaService = inject(BienvenidaService);
   readonly abierto = signal(false);
   readonly pasoActual = signal(0);
+  private keyboardHandler: ((e: KeyboardEvent) => void) | null = null;
 
   readonly labelAyuda = computed(() => {
     const i = this.langService.idioma();
@@ -339,8 +342,65 @@ export class TutorialComponent {
     return data;
   });
 
-  abrir(): void  { this.abierto.set(true);  this.pasoActual.set(0); }
-  cerrar(): void { this.abierto.set(false); }
+  abrir(): void {
+    this.abierto.set(true);
+    this.pasoActual.set(0);
+    this.setupKeyboardTrap();
+  }
+
+  private setupKeyboardTrap(): void {
+    // Wait for view to update with the modal
+    setTimeout(() => {
+      this.keyboardHandler = (e: KeyboardEvent) => this.handleKeyDown(e);
+      document.addEventListener('keydown', this.keyboardHandler);
+      // Focus first element
+      const first = this.focusableElements?.first?.nativeElement;
+      if (first) first.focus();
+    });
+  }
+
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (!this.abierto()) return;
+
+    const focusable = this.focusableElements?.map(el => el.nativeElement).filter(el => !!el) ?? [];
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.key === 'Tab') {
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Lifecycle hook
+  }
+
+  ngOnDestroy(): void {
+    this.removeKeyboardTrap();
+  }
+
+  private removeKeyboardTrap(): void {
+    if (this.keyboardHandler) {
+      document.removeEventListener('keydown', this.keyboardHandler);
+      this.keyboardHandler = null;
+    }
+  }
+
+  cerrar(): void { 
+    this.abierto.set(false); 
+  }
 
   repetirBienvenida(): void {
     this.bienvenidaService.resetear();
