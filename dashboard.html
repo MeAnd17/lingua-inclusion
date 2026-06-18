@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Lingua Inclusion</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --color-salud:       #E53935;
+      --color-educacion:   #1E88E5;
+      --color-derechos:    #8E24AA;
+      --color-emergencias: #F4511E;
+      --color-servicios:   #00897B;
+      --color-familia:     #F9A825;
+      --color-naturaleza:  #43A047;
+      --color-numeros:     #546E7A;
+      --bg-dark:           #1A1A2E;
+      --bg-card:           #16213E;
+      --bg-card2:          #0F3460;
+      --accent:            #E94560;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #E0E0E0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar-brand img { height: 32px; }
+    .navbar { background-color: var(--bg-card2) !important; border-bottom: 2px solid var(--accent); }
+
+    /* ── KPI Cards ── */
+    .kpi-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.5rem 1.25rem;
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+    .kpi-icon { font-size: 2.4rem; line-height: 1; }
+    .kpi-value { font-size: 2.6rem; font-weight: 700; line-height: 1.1; }
+    .kpi-label { font-size: .85rem; color: #9E9E9E; margin-top: .25rem; }
+
+    /* ── Chart cards ── */
+    .chart-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.07);
+      height: 100%;
+    }
+    .chart-card h6 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #9E9E9E; }
+    .chart-card h5 { font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; }
+    canvas { max-height: 280px; }
+
+    /* ── Badge pills ── */
+    .lang-badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: var(--bg-card2); border-radius: 50px;
+      padding: .45rem 1rem; font-size: .9rem; font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── Accessibility profiles ── */
+    .profile-card {
+      background: var(--bg-card2);
+      border-radius: 12px; padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      transition: transform .2s;
+    }
+    .profile-card:hover { transform: translateY(-3px); }
+    .profile-icon { font-size: 2rem; }
+    .profile-name { font-size: .85rem; font-weight: 600; margin-top: .4rem; }
+    .profile-desc { font-size: .75rem; color: #9E9E9E; }
+  </style>
+</head>
+
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar navbar-dark px-4 py-2">
+  <span class="navbar-brand fw-bold fs-5">
+    🌐 Lingua<span style="color:var(--accent)">Inclusion</span>
+  </span>
+  <span class="badge rounded-pill" style="background:var(--accent);font-size:.75rem;">
+    Dashboard de uso
+  </span>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+
+  <!-- ── KPI Row ── -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon mb-2">📚</div>
+        <div class="kpi-value" style="color:#E94560;">86</div>
+        <div class="kpi-label">Palabras en el diccionario</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon mb-2">🗂️</div>
+        <div class="kpi-value" style="color:#1E88E5;">8</div>
+        <div class="kpi-label">Categorías temáticas</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon mb-2">🌍</div>
+        <div class="kpi-value" style="color:#43A047;">3</div>
+        <div class="kpi-label">Idiomas soportados</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-icon mb-2">♿</div>
+        <div class="kpi-value" style="color:#F9A825;">4</div>
+        <div class="kpi-label">Perfiles de accesibilidad</div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /KPI Row -->
+
+  <!-- ── Charts Row ── -->
+  <div class="row g-3 mb-4">
+
+    <!-- Palabras por categoría — barras -->
+    <div class="col-12 col-lg-7">
+      <div class="chart-card">
+        <h6>Distribución</h6>
+        <h5>Palabras por categoría</h5>
+        <canvas id="chartCategorias"></canvas>
+      </div>
+    </div>
+
+    <!-- Proporción — dona -->
+    <div class="col-12 col-lg-5">
+      <div class="chart-card">
+        <h6>Proporción</h6>
+        <h5>Categorías del vocabulario</h5>
+        <canvas id="chartDona"></canvas>
+      </div>
+    </div>
+
+  </div>
+  <!-- /Charts Row -->
+
+  <!-- ── Idiomas + Accesibilidad ── -->
+  <div class="row g-3 mb-4">
+
+    <!-- Idiomas -->
+    <div class="col-12 col-md-5">
+      <div class="chart-card">
+        <h6>Cobertura</h6>
+        <h5>Idiomas disponibles</h5>
+
+        <div class="d-flex flex-column gap-3 mt-3">
+
+          <div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="lang-badge">
+                <span class="lang-dot" style="background:#1E88E5;"></span> Español
+              </span>
+              <span class="fw-bold">86 palabras</span>
+            </div>
+            <div class="progress" style="height:10px;border-radius:50px;background:#0F3460;">
+              <div class="progress-bar" style="width:100%;background:#1E88E5;border-radius:50px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="lang-badge">
+                <span class="lang-dot" style="background:#F9A825;"></span> Quechua
+              </span>
+              <span class="fw-bold">86 palabras</span>
+            </div>
+            <div class="progress" style="height:10px;border-radius:50px;background:#0F3460;">
+              <div class="progress-bar" style="width:100%;background:#F9A825;border-radius:50px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="lang-badge">
+                <span class="lang-dot" style="background:#43A047;"></span> Aymara
+              </span>
+              <span class="fw-bold">86 palabras</span>
+            </div>
+            <div class="progress" style="height:10px;border-radius:50px;background:#0F3460;">
+              <div class="progress-bar" style="width:100%;background:#43A047;border-radius:50px;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-4">
+          <canvas id="chartIdiomas" style="max-height:160px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perfiles accesibilidad -->
+    <div class="col-12 col-md-7">
+      <div class="chart-card">
+        <h6>Inclusión</h6>
+        <h5>Perfiles de accesibilidad</h5>
+        <div class="row g-3 mt-1">
+
+          <div class="col-6">
+            <div class="profile-card">
+              <div class="profile-icon">👁️</div>
+              <div class="profile-name">Estándar</div>
+              <div class="profile-desc">Usuarios sin necesidades especiales</div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="profile-card" style="border-color:rgba(249,168,37,.3);">
+              <div class="profile-icon">🔆</div>
+              <div class="profile-name" style="color:#F9A825;">Alto contraste</div>
+              <div class="profile-desc">Personas con baja visión</div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="profile-card" style="border-color:rgba(67,160,71,.3);">
+              <div class="profile-icon">🔊</div>
+              <div class="profile-name" style="color:#43A047;">Solo audio</div>
+              <div class="profile-desc">Discapacidad visual total</div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="profile-card" style="border-color:rgba(30,136,229,.3);">
+              <div class="profile-icon">🖼️</div>
+              <div class="profile-name" style="color:#1E88E5;">Pictogramas</div>
+              <div class="profile-desc">Analfabetismo digital</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /Idiomas + Accesibilidad -->
+
+  <p class="text-center text-muted" style="font-size:.75rem;">
+    Lingua-Inclusion · Interacción Humano Computador · Datos al 2025
+  </p>
+
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  // ── Datos reales extraídos de palabras.data.ts ──
+  const categorias = {
+    labels: ['Salud', 'Educación', 'Derechos', 'Emergencias', 'Servicios', 'Familia', 'Naturaleza', 'Números'],
+    counts: [15, 12, 10, 10, 10, 12, 12, 15],
+    colors: ['#E53935','#1E88E5','#8E24AA','#F4511E','#00897B','#F9A825','#43A047','#546E7A']
+  };
+
+  Chart.defaults.color = '#9E9E9E';
+  Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+  // ── 1. Gráfico de barras: palabras por categoría ──
+  new Chart(document.getElementById('chartCategorias'), {
+    type: 'bar',
+    data: {
+      labels: categorias.labels,
+      datasets: [{
+        label: 'Palabras',
+        data: categorias.counts,
+        backgroundColor: categorias.colors,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.raw} palabras`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { stepSize: 5 },
+          min: 0, max: 18
+        }
+      }
+    }
+  });
+
+  // ── 2. Gráfico de dona: proporción de categorías ──
+  new Chart(document.getElementById('chartDona'), {
+    type: 'doughnut',
+    data: {
+      labels: categorias.labels,
+      datasets: [{
+        data: categorias.counts,
+        backgroundColor: categorias.colors,
+        borderWidth: 2,
+        borderColor: '#1A1A2E',
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 12, font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} palabras (${Math.round(ctx.raw/86*100)}%)`
+          }
+        }
+      }
+    }
+  });
+
+  // ── 3. Gráfico de barras horizontales: idiomas ──
+  new Chart(document.getElementById('chartIdiomas'), {
+    type: 'bar',
+    data: {
+      labels: ['Español', 'Quechua', 'Aymara'],
+      datasets: [{
+        label: 'Palabras',
+        data: [86, 86, 86],
+        backgroundColor: ['#1E88E5', '#F9A825', '#43A047'],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.raw} palabras` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { stepSize: 20 },
+          min: 0, max: 100
+        },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

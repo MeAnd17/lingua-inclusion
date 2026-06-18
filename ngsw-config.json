@@ -40,10 +40,23 @@
       }
     }
   ],
+  "dataGroups": [
+    {
+      "name": "api-freshness",
+      "urls": [],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 10,
+        "maxAge": "1h",
+        "timeout": "5s"
+      }
+    }
+  ],
   "navigationUrls": [
     "/**",
     "!/**/*.*",
     "!/**/*__*",
     "!/**/*__*/**"
-  ]
+  ],
+  "navigationRequestStrategy": "freshness"
 }

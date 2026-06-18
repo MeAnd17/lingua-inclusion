@@ -40,6 +40,7 @@ import { Categoria, CATEGORIAS_CONFIG } from '../../models/palabra.model';
             autocorrect="off"
             spellcheck="false"
             aria-autocomplete="list"
+            aria-describedby="campo-busqueda-hint"
             [attr.aria-controls]="'resultados-lista'"
             [attr.aria-expanded]="busquedaService.hayBusqueda()"
           />
@@ -54,6 +55,10 @@ import { Categoria, CATEGORIAS_CONFIG } from '../../models/palabra.model';
             </button>
           }
         </div>
+        <!-- Descripción permanente accesible (WCAG 3.3.2) -->
+        <p id="campo-busqueda-hint" class="buscador__hint">
+          {{ hintBusqueda() }}
+        </p>
       </div>
 
       <!-- Filtros por categoría -->
@@ -140,6 +145,13 @@ export class BuscadorComponent {
     if (idioma === 'qu') return 'Imatam maskankichu...';
     if (idioma === 'ay') return 'Kunasa maskañataki...';
     return 'Escribe en español, quechua o aymara...';
+  };
+
+  readonly hintBusqueda = () => {
+    const idioma = this.langService.idioma();
+    if (idioma === 'qu') return 'Español, Quechua, Aymara simikunapi maskay atinki.';
+    if (idioma === 'ay') return 'Español, Quechua, Aymara simiru maskañataki atañataki.';
+    return 'Puedes buscar en español, quechua o aymara.';
   };
 
   readonly mensajeSinResultados = () => {

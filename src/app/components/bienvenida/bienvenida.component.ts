@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, effect, AfterViewInit } from '@angular/core';
+import { Component, inject, computed, signal, effect, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BienvenidaService } from '../../services/bienvenida.service';
 import { LanguageService } from '../../services/language.service';
@@ -149,7 +149,7 @@ import { TouchTargetDirective } from '../../directives/touch-target.directive';
   `,
   styleUrls: ['./bienvenida.component.scss'],
 })
-export class BienvenidaComponent implements AfterViewInit {
+export class BienvenidaComponent implements AfterViewInit, OnDestroy {
   readonly bienvenida  = inject(BienvenidaService);
   readonly langService = inject(LanguageService);
   private readonly tecladoNav = inject(TecladoNavService);
@@ -161,24 +161,85 @@ export class BienvenidaComponent implements AfterViewInit {
   ];
 
   private readonly orden = ['es', 'qu', 'ay'];
+  private keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
   constructor() {
-    // Cuando el tutorial escrito aparece: bloquear scroll
+    // Cuando el tutorial escrito aparece: bloquear scroll y activar focus trap
     effect(() => {
       if (this.bienvenida.mostrandoEscrito()) {
         this.tecladoNav.modalAbierto.set(true);
         document.body.style.overflow = 'hidden';
-      } else if (!this.bienvenida.reproduciendo()) {
-        this.tecladoNav.modalAbierto.set(false);
-        document.body.style.overflow = '';
+        this.activarFocusTrap();
+      } else {
+        this.desactivarFocusTrap();
+        if (!this.bienvenida.reproduciendo()) {
+          this.tecladoNav.modalAbierto.set(false);
+          document.body.style.overflow = '';
+        }
       }
     });
   }
 
   ngAfterViewInit(): void {}
 
-  // ── Selector ───────────────────────────────────────────────────────────────
-  // (Movido a SelectorInicialComponent)
+  ngOnDestroy(): void {
+    this.desactivarFocusTrap();
+  }
+
+  // ── Focus trap ─────────────────────────────────────────────────────────────
+
+  private activarFocusTrap(): void {
+    if (this.keyHandler) return;
+    setTimeout(() => {
+      // Foco inicial en el botón cerrar
+      const primerFoco = document.querySelector<HTMLElement>('.bv-escrito .bv-escrito__cerrar');
+      primerFoco?.focus();
+    }, 100);
+
+    this.keyHandler = (e: KeyboardEvent) => this.manejarTeclasTrap(e);
+    document.addEventListener('keydown', this.keyHandler);
+  }
+
+  private desactivarFocusTrap(): void {
+    if (this.keyHandler) {
+      document.removeEventListener('keydown', this.keyHandler);
+      this.keyHandler = null;
+    }
+  }
+
+  private manejarTeclasTrap(e: KeyboardEvent): void {
+    if (!this.bienvenida.mostrandoEscrito()) return;
+
+    if (e.key === 'Escape') {
+      this.bienvenida.cerrarEscrito();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const focusables = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '.bv-escrito button:not([disabled])'
+        )
+      ).filter(el => el.offsetParent !== null);
+
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last  = focusables[focusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }
 
   // ── Tutorial escrito ───────────────────────────────────────────────────────
 
@@ -189,9 +250,8 @@ export class BienvenidaComponent implements AfterViewInit {
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
       this.bienvenida.anteriorPasoEscrito();
-    } else if (e.key === 'Escape') {
-      this.bienvenida.cerrarEscrito();
     }
+    // Escape y Tab son manejados por el focus trap global
   }
 
   readonly pasoActual = computed(() => {
